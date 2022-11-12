@@ -1,0 +1,30 @@
+image: python:latest
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  only:
+    - tags
+  script:
+    - export VERSION=$(git tag --list | sort -V | tail -n1) && cd authenticate && docker build -f Dockerfile -t iman1234/auth:$VERSION .
+    - export VERSION=$(git tag --list | sort -V | tail -n1) && docker push iman1234/auth:$VERSION
+
+test:
+  stage: test
+  only:
+    - tags
+  script:
+    -  export DATABASE_URI="postgresql://admin:test123@10.43.118.79/postgresdb" && pytest authenticate/tests/ 
+
+
+deploy:
+  stage: deploy
+  only:
+    - tags
+  script:
+    -  VERSION=$(git tag --list | sort -V | tail -n1) yq e -i '.version = strenv(VERSION)' /home/gitlab-runner/auth-chart/Chart.yaml
+    -  VERSION=$(git tag --list | sort -V | tail -n1) yq e -i '.appVersion = strenv(VERSION)' /home/gitlab-runner/auth-chart/Chart.yaml 
+    - export KUBECONFIG=/home/gitlab-runner/k3s.yaml && helm upgrade --install auth /home/gitlab-runner/auth-chart/

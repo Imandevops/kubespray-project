@@ -1,0 +1,51 @@
+all:
+  hosts:
+    node1:
+      ansible_host: 172.17.103.155
+      ip: 172.17.103.155
+      access_ip: 172.17.103.155
+    node2:
+      ansible_host: 172.17.103.156
+      ip: 172.17.103.156
+      access_ip: 172.17.103.156
+    node3:
+      ansible_host: 172.17.103.157
+      ip: 172.17.103.157
+      access_ip: 172.17.103.157
+    node4:
+      ansible_host: 172.17.103.158
+      ip: 172.17.103.158
+      access_ip: 172.17.103.158
+    node5:
+      ansible_host: 172.17.103.159
+      ip: 172.17.103.159
+      access_ip: 172.17.103.159
+    node6:
+      ansible_host: 172.17.103.160
+      ip: 172.17.103.160
+      access_ip: 172.17.103.160
+  children:
+    kube_control_plane:
+      hosts:
+        node1:
+        node2:
+        node3:
+    kube_node:
+      hosts:
+        node1:
+        node2:
+        node3:
+        node4:
+        node5:
+        node6:
+    etcd:
+      hosts:
+        node1:
+        node2:
+        node3:
+    k8s_cluster:
+      children:
+        kube_control_plane:
+        kube_node:
+    calico_rr:
+      hosts: {}
